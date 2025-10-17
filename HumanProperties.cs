@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -66,6 +68,10 @@ namespace WorldSimulation
         public double MoralLevel { get; set; }
         public double LegacyLevel { get; set; }
 
+        // Relationship attributes
+        public HumanProperties Mother {  get; set; }
+        public HumanProperties Father {  get; set; }
+
 
         public HumanProperties(string name, Gender gender, string birthLocation, bool isAlive)
         {
@@ -83,24 +89,51 @@ namespace WorldSimulation
 
         public HumanProperties MakeChild(HumanProperties partner)
         {
+            if (!IsAlive || !partner.IsAlive)
+            {
+                Console.WriteLine($"{Name} or {partner.Name} cannot have a child because one of them is not alive.");
+                return null;
+            }
+
+            if (Gender == partner.Gender)
+            {
+                Console.WriteLine($"{Name} and {partner.Name} cannot have a child together — same gender.");
+                return null;
+            }
+
             Random rand = new Random();
             string[] maleName = { "John", "Michael", "David", "James", "Robert", "William", "Mark", "Richard", "Thomas", "Charles" };
-            string[] femaleName = { "Mary", "Patricia", "Linda", "Barbara", "Elizabeth", "Jennifer", "Maria", "Susan", "Margaret", "Dorothy", "Sara"};
+            string[] femaleName = { "Mary", "Patricia", "Linda", "Barbara", "Elizabeth", "Jennifer", "Maria", "Susan", "Margaret", "Dorothy", "Sara" };
 
             Gender childGender;
             string childName;
+
             if (rand.Next(0, 2) == 0)
             {
                 childGender = Gender.Male;
-                childName = maleName[rand.Next(0, maleName.Length)];
+                childName = maleName[rand.Next(maleName.Length)];
             }
             else
             {
                 childGender = Gender.Female;
-                childName = femaleName[rand.Next(0, femaleName.Length)];
+                childName = femaleName[rand.Next(femaleName.Length)];
             }
 
             HumanProperties child = new HumanProperties(childName, childGender, partner.HomeLocation, true);
+
+            // Assign parents
+            if (Gender == Gender.Female)
+            {
+                child.Mother = this;
+                child.Father = partner;
+            }
+            else
+            {
+                child.Father = this;
+                child.Mother = partner;
+            }
+
+            Console.WriteLine($"{Name} and {partner.Name} had a child named {child.Name} ({child.Gender}) in {child.HomeLocation}.");
             return child;
         }
 
@@ -274,6 +307,81 @@ namespace WorldSimulation
             HumanProperties human = new HumanProperties(humanName, humanGender, humanHomeLocation, true);
             human.Age = humanAge;
             return human;
+        }
+        
+        List<HumanProperties> Society = new List<HumanProperties> {};
+        public void SimulateYear()
+        {
+            Console.WriteLine("\nA new year begins... everyone grows older.");
+            
+            Random rand = new Random();
+
+            foreach (HumanProperties human in Society.ToList()) // .ToList() prevents modifying the list during loop
+            {
+                if (!human.IsAlive) continue; 
+                
+                human.GetOlder();
+
+                double healthAdjustment = rand.Next(-25, 21);    // -25 to +20
+                double happinessAdjustment = rand.Next(-25, 21); // -25 to +20
+
+                // Increase energy and happiness slightly
+                human.Health += healthAdjustment;
+                if (human.Health > 100) human.Health = 100;
+                if (human.Health < 0)
+                {
+                    human.Health = 0;
+                    human.Die(); // person dies if health drops to 0
+                }
+
+                human.Happiness += happinessAdjustment;
+                if (human.Happiness > 100) human.Happiness = 100;
+                if (human.Happiness < 0) human.Happiness = 0;
+                
+                // Possibly add a few new people (births)
+                int births = rand.Next(0, 3); // 0–2 new babies per year
+                for (int i = 0; i < births; i++)
+                {
+                    HumanProperties newHuman = HumanProperties.HumanGenerator(); // assumes static CreateAHuman()
+                    Society.Add(newHuman);
+                    Console.WriteLine($"A new human is born: {newHuman.Name} ({newHuman.Gender}) from {newHuman.HomeLocation}");
+                }
+
+                // Possibly remove some random humans (accidents, etc.)
+                int deaths = rand.Next(0, 2); // 0–1 random deaths
+                for (int i = 0; i < deaths && Society.Count > 0; i++)
+                {
+                    var randomIndex = rand.Next(Society.Count);
+                    var unlucky = Society[randomIndex];
+                    unlucky.Die();
+                }
+
+                Console.WriteLine($"Year complete. Population: {HumanProperties.PopulationCounter}\n");
+            }
+        }
+
+        public void GotoSchool()
+        {
+            if (!IsAlive)
+            {
+                Console.WriteLine($"{Name} cannot go to school — they are no longer alive.");
+                return;
+            }
+
+            // Initialize Skills list if it's null
+            if (Skills == null)
+                Skills = new List<string>();
+
+            // Add "Education" skill if not already there
+            if (!Skills.Contains("Education"))
+                Skills.Add("Education");
+
+            // Increase Intelligence
+            Intelligence += 5;
+            if (Intelligence > 200) Intelligence = 200; // cap at 200 for realism
+
+            Console.WriteLine($"{Name} went to school. Intelligence: {Intelligence}, Skills: {string.Join(", ", Skills)}");
+
         }
     }
 }

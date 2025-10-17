@@ -112,53 +112,7 @@
 
 
 
-
-
-
-            //var Saras = Society.Where(h => h.Name == "Sara").ToList();
-
-            //Console.WriteLine(Society[0].ToString());
-
-            //var peopleOver10 = Society.Where(h => h.Age >= 9).ToList();
-            //foreach (Human h in peopleOver10)
-            //{
-            //    Console.WriteLine(h);
-            //}
-
-
-            //Console.WriteLine("Only males in the list");
-            //foreach (Human human in Society)
-            //{
-            //    if(human.Gender == Gender.Male)
-            //    {
-            //        Console.WriteLine(human);
-            //    }
-            //}
-
-            //Console.WriteLine("============================");
-
-            //var females = Society.Where(f => f.Gender == Gender.Female).ToList();
-            //Console.WriteLine("Only females in the list");
-            //foreach (Human female in females)
-            //{
-            //    Console.WriteLine(female);
-            //}
-
-            //List <int> numbers = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-            //List<int> evenNumbers = new List<int>();
-            //foreach (int number in numbers) 
-            //{
-            //    if (number % 2 == 0) 
-            //    {
-            //        evenNumbers.Add(number);
-            //    }
-            //}
-
-            //var evenNumber2 = numbers.Where(n => n % 2 == 0).ToList();
-            //foreach (int number in evenNumber2)
-            //{
-            //    Console.WriteLine(number);
-            //}
+            
         }
     }
 }

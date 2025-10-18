@@ -71,6 +71,8 @@ namespace WorldSimulation
         // Relationship attributes
         public HumanProperties Mother {  get; set; }
         public HumanProperties Father {  get; set; }
+        public List<HumanProperties> Children { get; set; } = new List<HumanProperties>();
+
 
 
         public HumanProperties(string name, Gender gender, string birthLocation, bool isAlive)
@@ -132,6 +134,10 @@ namespace WorldSimulation
                 child.Father = this;
                 child.Mother = partner;
             }
+
+            // Add child to both parents' Children lists
+            this.Children.Add(child);
+            partner.Children.Add(child);
 
             Console.WriteLine($"{Name} and {partner.Name} had a child named {child.Name} ({child.Gender}) in {child.HomeLocation}.");
             return child;
@@ -309,58 +315,8 @@ namespace WorldSimulation
             return human;
         }
         
-        List<HumanProperties> Society = new List<HumanProperties> {};
-        public void SimulateYear()
-        {
-            Console.WriteLine("\nA new year begins... everyone grows older.");
-            
-            Random rand = new Random();
 
-            foreach (HumanProperties human in Society.ToList()) // .ToList() prevents modifying the list during loop
-            {
-                if (!human.IsAlive) continue; 
-                
-                human.GetOlder();
-
-                double healthAdjustment = rand.Next(-25, 21);    // -25 to +20
-                double happinessAdjustment = rand.Next(-25, 21); // -25 to +20
-
-                // Increase energy and happiness slightly
-                human.Health += healthAdjustment;
-                if (human.Health > 100) human.Health = 100;
-                if (human.Health < 0)
-                {
-                    human.Health = 0;
-                    human.Die(); // person dies if health drops to 0
-                }
-
-                human.Happiness += happinessAdjustment;
-                if (human.Happiness > 100) human.Happiness = 100;
-                if (human.Happiness < 0) human.Happiness = 0;
-                
-                // Possibly add a few new people (births)
-                int births = rand.Next(0, 3); // 0–2 new babies per year
-                for (int i = 0; i < births; i++)
-                {
-                    HumanProperties newHuman = HumanProperties.HumanGenerator(); // assumes static CreateAHuman()
-                    Society.Add(newHuman);
-                    Console.WriteLine($"A new human is born: {newHuman.Name} ({newHuman.Gender}) from {newHuman.HomeLocation}");
-                }
-
-                // Possibly remove some random humans (accidents, etc.)
-                int deaths = rand.Next(0, 2); // 0–1 random deaths
-                for (int i = 0; i < deaths && Society.Count > 0; i++)
-                {
-                    var randomIndex = rand.Next(Society.Count);
-                    var unlucky = Society[randomIndex];
-                    unlucky.Die();
-                }
-
-                Console.WriteLine($"Year complete. Population: {HumanProperties.PopulationCounter}\n");
-            }
-        }
-
-        public void GotoSchool()
+        public void GoToSchool()
         {
             if (!IsAlive)
             {
@@ -381,7 +337,33 @@ namespace WorldSimulation
             if (Intelligence > 200) Intelligence = 200; // cap at 200 for realism
 
             Console.WriteLine($"{Name} went to school. Intelligence: {Intelligence}, Skills: {string.Join(", ", Skills)}");
-
         }
+
+        public void LearnSkill(string skill)
+        {
+            if (!IsAlive)
+            {
+                Console.WriteLine($"{Name} cannot learn {skill} — they are no longer alive.");
+                return;
+            }
+
+            // Check if skill already learned
+            if (Skills.Contains(skill))
+            {
+                Console.WriteLine($"{Name} already knows {skill}.");
+                return;
+            }
+
+            // Add the new skill
+            Skills.Add(skill);
+
+            // Slightly improve creativity
+            Creativity += 5;
+            if (Creativity > 100) Creativity = 100;
+
+            Console.WriteLine($"{Name} learned a new skill: {skill}. Creativity: {Creativity}");
+        }
+
+        
     }
 }

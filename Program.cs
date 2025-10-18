@@ -39,32 +39,51 @@
             Console.WriteLine("\nNew 10 people were created in the world");
             // Add 10 randome humans to society
             var newHuman = new List<HumanProperties>();
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < 10; i++)
                 Society.Add(HumanProperties.HumanGenerator());
 
             // Display population and details
             Console.WriteLine($"\nThe curent population is: {HumanProperties.PopulationCounter}");
-            foreach (HumanProperties human in Society)
-                Console.WriteLine(human);
 
+            
+            // List all male humans, LINQ
+            var males = Society.Where(f => f.Gender == Gender.Male).ToList();
+            var adultMales = Society.Where(f => f.Gender == Gender.Male && f.IsAlive && f.Age >= 18 && f.Age <= 50).ToList();
+            
+            Console.WriteLine($"\nOnly males in the society (Total: {males.Count}):");
+            Console.WriteLine($"{adultMales.Count} men are in age between 18 and 50");
+            
+            foreach (HumanProperties male in males)
+                Console.WriteLine(male);
 
+            
+            // List all female humans, LINQ
+            var females = Society.Where(f => f.Gender == Gender.Female).ToList();
+            var adultFemales = Society.Where(f => f.Gender == Gender.Female && f.IsAlive && f.Age >= 18 && f.Age <= 50).ToList();
+            
+            Console.WriteLine($"\nOnly females in the society (Total: {females.Count}):");
+            Console.WriteLine($"{adultFemales.Count} women are in age between 18 and 50");
+            
+            foreach (HumanProperties female in females)
+                Console.WriteLine(female);
 
 
 
             // Create a Simulation object
-            Simulation sim = new Simulation();
-            sim.PrintRandomMale();
+            Simulation sim = new Simulation(Society);
 
-            //sim.GenerateOneGeneration();
+            sim.GenerateOneGeneration();
 
-            //Console.WriteLine("\nFive years passed since the world was created, new people were born, and some died");
 
-            ////  Run multiple years
-            //for (int year = 1; year <= 5; year++)
-            //{
-            //    Console.WriteLine($"--- YEAR {year} ---");
-            //    sim.SimulateYear();
-            //}
+
+            Console.WriteLine("\nFive years passed since the world was created, new people were born, and some died");
+
+            //  Run multiple years
+            for (int year = 1; year <= 5; year++)
+            {
+                Console.WriteLine($"--- YEAR {year} ---");
+                sim.SimulateYear();
+            }
 
 
 

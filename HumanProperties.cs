@@ -15,7 +15,7 @@ namespace WorldSimulation
         Other
     }
 
-    class HumanProperties
+    public class HumanProperties
     {
         public static long PopulationCounter { get; set; } = 0;
 

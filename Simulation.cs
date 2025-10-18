@@ -8,8 +8,13 @@ namespace WorldSimulation
 {
     public class Simulation
     {
-        List<HumanProperties> Society = new List<HumanProperties> { };
-        
+        public List<HumanProperties> Society { get; set; }
+
+        public Simulation(List<HumanProperties> existingSociety)
+        {
+            Society = existingSociety;
+        }
+
         public void SimulateYear()
         {
             Random rand = new Random();
@@ -74,58 +79,58 @@ namespace WorldSimulation
             Console.WriteLine($"Average Health: {avgHealth:F1}\n");
         }
 
-        
-        
-        HumanProperties GetRandomFemale(List<HumanProperties> Society)
+
+
+
+
+        public HumanProperties GetRandomMale()
         {
+            var males = Society
+                .Where(m => m.Gender == Gender.Male && m.IsAlive && m.Age >= 18 && m.Age <= 50)
+                .ToList();
+
+            if (males.Count == 0)
+                return null;
+
             Random rand = new Random();
-            var females = Society.Where(h => h.Gender == Gender.Female && h.IsAlive && h.Age >= 18 && h.Age <= 50).ToList();
-
-            if (females.Count == 0) return null;
-
-            return females[rand.Next(females.Count)];
-        }
-
-        HumanProperties GetRandomMale(List<HumanProperties> Society)
-        {
-            Random rand = new Random();
-            var males = Society.Where(h => h.Gender == Gender.Male && h.IsAlive && h.Age >= 18 && h.Age <= 50).ToList();
-
-            if (males.Count == 0) return null;
-
             return males[rand.Next(males.Count)];
         }
 
-        
-        
-        
-        public void GenerateOneGeneration()
+
+        public HumanProperties GetRandomFemale()
         {
-            while (Society.Count(h => h.Age >= 18 && h.Age <= 50) < 2)
-            {
-                Society.Add(HumanProperties.HumanGenerator());
-            }
-            Console.WriteLine("\n--- Generating new generation ---");
+            var females = Society
+                .Where(f => f.Gender == Gender.Female && f.IsAlive && f.Age >= 18 && f.Age <= 50)
+                .ToList();
+
+            if (females.Count == 0)
+                return null;
 
             Random rand = new Random();
+            return females[rand.Next(females.Count)];
+        }
+
+
+
+        public void GenerateOneGeneration()
+        {
+            Console.WriteLine("\n--- New generation ---");
+
             int childrenCreated = 0;
 
             for (int i = 0; i < 15; i++)
             {
-                var father = GetRandomMale(Society);
-                var mother = GetRandomFemale(Society);
-
-                if (father == null || mother == null)
-                {
-                    Console.WriteLine("Not enough adults to generate a new generation.");
-                    break;
-                }
+                var father = GetRandomMale();
+                var mother = GetRandomFemale();
 
                 var child = father.MakeChild(mother);
+
                 if (child != null)
                 {
                     Society.Add(child);
                     childrenCreated++;
+                    Random rand = new Random();
+                    int childAge = rand.Next(0, 8);
                 }
             }
 
